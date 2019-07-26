@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    /* .progress {
+      width: 600px;
+      height: 40px;
+      border: 1px solid #000;
+      margin: 100px auto;
+    }
+    .inner-progress {
+      height: 40px;
+      background-color: red;
+      width: 0%;
+    } */
+  </style>
+  <link rel="stylesheet" href="../../static/css/bootstrap.css">
+  <style>
+    .progress {
+      width: 80%;
+      margin: 100px auto;
+    }
+    .progress-bar {
+      color : blue;
+      font-weight: 700;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- <div class="progress">
+    <div class="inner-progress"></div>
+  </div> -->
+
+  <!-- 选择文件的按钮 -->
+  <input type="file" id="btn">
+  <!-- 进度条 -->
+  <div class="progress">
+      <div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: 0%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">0%</div>
+    </div>
+</body>
+<script>
+/*
+  ajax的上传事件
+
+    ajax 在 XMLHttpRequest 2.0里面提供了一个事件，是ajax的上传事件
+
+      从xhr身上获取
+        let xhr = new XMLHttpRequest();
+        xhr.upload.onprogress 事件 ，该事件会在上传的时候触发
+
+      计算上传的进度
+        进度 = 已经上传 / 总共要上传的
+        上传进度事件里面有一个事件对象，事件对象知道该上传多少，已经上传了多少
+
+        事件对象.loaded 是已经上传的
+        事件对象.total 是总共要上传的
+*/
+
+let btn = document.querySelector('#btn');
+let bar = document.querySelector('.progress-bar');
+btn.onchange = function(){
+  // 获取文件
+  let file = this.files[0];
+  // 转换为文件流
+  let fd = new FormData();
+  fd.append('pic',file);
+  // 使用ajax上传
+  // 先讲解原生的ajax如何实现上传进度
+  let xhr = new XMLHttpRequest();
+  xhr.open('post','http://127.0.0.1:8080/uploadHeadImg');
+
+  // 注册正在上传事件
+  xhr.upload.onprogress = function(e){
+    // console.log('上传事件触发了');
+    // console.log(e);
+    // console.log(e.loadd / e.total);
+    console.log(e)
+
+    // 保留两位小数： * 10000 取整 / 100 
+    let perent = parseInt(e.loaded / e.total * 10000) / 100 + '%'
+    bar.style.width = perent;
+    bar.innerText = perent;
+  }
+
+  // fd对象会自动设置请求，就不需要我们自己设置了
+  // 直接发送即可
+  xhr.send(fd);
+  xhr.onreadystatechange = function(){
+    if(xhr.status === 200 && xhr.readyState === 4){
+      // console.log(xhr.responseText); // 字符串
+      let res = JSON.parse(xhr.responseText);
+      console.log(res);
+    }
+  }
+  
+}
+</script>
+</html>
